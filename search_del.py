@@ -36,23 +36,26 @@ def load_progress():
     if os.path.exists(progress_file):
         with open(progress_file, 'r') as f:
             return json.load(f)
-    return {'page': 1}
+    return {'processed_keys': [], 'current_page': 1}
 
 # 保存进度
-def save_progress(page):
+def save_progress(processed_keys, current_page):
     with open(progress_file, 'w') as f:
-        json.dump({'page': page}, f)
+        json.dump({'processed_keys': processed_keys, 'current_page': current_page}, f)
 
 # 加载上次的进度
 progress = load_progress()
-page = progress['page']
+processed_keys = set(progress['processed_keys'])
+current_page = progress['current_page']
+
 while True:
     params = {
-        'page': page,  # 始终请求第 1 页
-        'order': 'newest',
+        'page': current_page,
+        'order': 'least',
         'permission': 'public'
     }
-    print(f'请求第 {page} 页')
+    
+    print(f'请求第 {current_page} 页')
     response = requests.get(f'{base_url}/images', params=params, headers=headers)
     
     if response.status_code == 200:
@@ -63,24 +66,36 @@ while True:
                 print("没有更多图片数据，处理完成。")
                 break
             
+            page_processed = False
             for image in data['data']['data']:
-                url = image['links']['url']
                 key = image['key']
+                if key in processed_keys:
+                    continue  # 跳过已处理的图片
+                
+                url = image['links']['url']
                 
                 if not search_url_in_files(url, os.path.expanduser(search_directory)):
-                    url = f'{base_url}/images/{key}'
-                    response = requests.delete(url, headers=headers)
-                    if response.status_code == 200:
+                    delete_url = f'{base_url}/images/{key}'
+                    delete_response = requests.delete(delete_url, headers=headers)
+                    if delete_response.status_code == 200:
                         print(f'成功删除图片，key: {key}')
+                        page_processed = True
                     else:
-                        print(f'删除图片失败，key: {key}。状态码: {response.status_code}')
-                        print(f'响应内容: {response.text}') 
-                    time.sleep(1)
-            if data['data']['last_page'] > page:
-                page += 1
-                save_progress(page)  # 保存当前进度
-            else:
-                break  # 如果没有下一页，退出循环
+                        print(f'删除图片失败，key: {key}。状态码: {delete_response.status_code}')
+                        print(f'响应内容: {delete_response.text}')
+                
+                processed_keys.add(key)
+                #save_progress(list(processed_keys), current_page)  # 保存当前进度
+                #time.sleep(1)
+            save_progress(list(processed_keys), current_page)
+            if not page_processed:
+                # 如果这一页没有删除任何图片，移动到下一页
+                if current_page < data['data']['last_page']:
+                    current_page += 1
+                    save_progress(list(processed_keys), current_page)
+                else:
+                    print("所有页面都已处理完毕，没有需要删除的图片。")
+                    break
         else:
             print(f"处理出错: {data['message']}")
             break  # 如果处理出错，退出循环

@@ -15,5 +15,4 @@ LSky 图床增强工具
     echo 'export LSKY_AUTHORIZATION=[token]'>>~/.zshrc
     ```
 - 本工具主要使用 LSky 官方提供的 API 获取图片清单、查询图片的 Key，并利用 Key 调用 API 进行删除操作。
-- 工具第一次执行时会自动在当前目录下生成 search_del_progress.json 文件用于记录当前进度，如程序中断再次启动时，会自动读取该文件中记录的页数。
-- 由于删除过程中会导致页数发生变化，这个无法避免，因此建议在第一次处理完成后，可以删除 search_del_progress.json 文件或者修改其中记录的页数，然后重新执行。
+- 工具第一次执行时会自动在当前目录下生成 search_del_progress.json 文件用于记录当前进度以及已处理的 Key，如程序中断再次启动时，会自动读取该文件中记录的页数。
