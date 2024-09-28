@@ -84,8 +84,7 @@ def main():
                         page_processed = True
                     
                     processed_keys.add(key)
-                    time.sleep(1)
-                
+                    
                 save_progress(list(processed_keys), current_page)
                 if not page_processed:
                     # 如果这一页没有删除任何图片，移动到下一页
@@ -95,6 +94,7 @@ def main():
                     else:
                         print("所有页面都已处理完毕，没有需要删除的图片。")
                         return True  # 正常完成
+                time.sleep(0.5)
             else:
                 print(f"处理出错: {data['message']}")
                 return False  # 异常结束
