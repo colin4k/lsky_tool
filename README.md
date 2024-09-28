@@ -2,7 +2,7 @@
 LSky 图床增强工具
 
 ## 说明
-- 本工具主要用于清理LSky图床中冗余 的图片，判断的标准是该图片是否在 Obsidian 笔记中使用。
+- 本工具主要用于清理LSky图床中冗余 的图片，判断的标准是该图片是否在 Obsidian 笔记中使用。因此需要修改代码中`search_directory = '/Users/colin/Library/Mobile Documents/iCloud~md~obsidian/Documents/ColinVault'`为自己的 Obsidian 仓库地址。
 - 在使用本工具前需要先获取 LSky 的 token，然后在环境变量中设置
     - 命令行执行以下命令获取 LSky 的 token：
     ```bash
