@@ -51,7 +51,7 @@ current_page = progress['current_page']
 while True:
     params = {
         'page': current_page,
-        'order': 'least',
+        'order': 'newest',
         'permission': 'public'
     }
     
