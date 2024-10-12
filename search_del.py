@@ -59,8 +59,23 @@ def main():
             }
             
             print(f'请求第 {current_page} 页')
-            response = requests.get(f'{base_url}/images', params=params, headers=headers, timeout=10)
-            response.raise_for_status()
+            
+            retry_count = 0
+            while retry_count < 3:
+                try:
+                    response = requests.get(f'{base_url}/images', params=params, headers=headers, timeout=10)
+                    response.raise_for_status()
+                    break
+                except requests.exceptions.HTTPError as e:
+                    if e.response.status_code == 429:
+                        retry_count += 1
+                        if retry_count == 3:
+                            raise
+                        print(f"遇到 429 错误，等待 30 秒后重试（第 {retry_count} 次）")
+                        time.sleep(30)
+                    else:
+                        raise
+
             data = response.json()
             
             if data['status']:
